@@ -1,0 +1,14 @@
+# MegaLinter Configuration
+# https://megalinter.io/
+
+APPLY_FIXES: none
+CLEAR_REPORT_FOLDER: true
+VALIDATE_ALL_CODEBASE: true
+
+ENABLE:
+  - JAVA
+
+DISABLE:
+  - REPOSITORY
+
+FILTER_REGEX_EXCLUDE: '(build/|target/|\.gradle/|node_modules/)'
