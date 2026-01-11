@@ -1,64 +1,69 @@
 
-# TP Exercice 4 : Projection des Ã©vÃ©nements dans des vues matÃ©rialisÃ©es
 
-## TÃ¢che 1 : Questions sur la base de code
+# TP Exercice 4 : Projection des événements dans des vues matérialisées
 
-- **Interface Projector :** applique un Ã©vÃ©nement Ã  une vue matÃ©rialisÃ©e et met Ã  jour son Ã©tat.
 
-- **Type S :** reprÃ©sente l'Ã©tat de la vue matÃ©rialisÃ©e (DTO ou entitÃ©).
+## Tâche 1 : Questions sur la base de code
 
-- **Javadoc pour S :** S est le modÃ¨le de lecture mis Ã  jour par les Ã©vÃ©nements.
+- **Interface Projector :** applique un événement à une vue matérialisée et met à jour son état.
 
-- **Pourquoi interface Projector :** permet plusieurs implÃ©mentations, facilite les tests et le dÃ©couplage.
+- **Type S :** représente l'état de la vue matérialisée (DTO ou entité).
 
-- **RÃ´le de ProjectionResult :** contient le rÃ©sultat dâun Ã©vÃ©nement (succÃ¨s, Ã©chec, nouvel Ã©tat).
+- **Javadoc pour S :** S est le modèle de lecture mis à jour par les événements.
 
-- **IntÃ©rÃªt de la monade :** gÃ¨re succÃ¨s/erreur sans exceptions, facilite la composition et les tests.
+- **Pourquoi interface Projector :** permet plusieurs implémentations, facilite les tests et le découplage.
 
-## TÃ¢che 2 : Outboxing
+- **Rôle de ProjectionResult :** contient le résultat d’un événement (succès, échec, nouvel état).
 
-- **OutboxRepository :** stocke les Ã©vÃ©nements Ã  publier et suit leur Ã©tat (PENDING, SENT, FAILED).
+- **Intérêt de la monade :** gère succès/erreur sans exceptions, facilite la composition et les tests.
 
-- **Garantie de livraison :** Ã©crire lâÃ©tat mÃ©tier + outbox dans la mÃªme transaction ; le dispatcher lit ensuite et publie.
+
+## Tâche 2 : Outboxing
+
+- **OutboxRepository :** stocke les événements à publier et suit leur état (PENDING, SENT, FAILED).
+
+- **Garantie de livraison :** écrire l’état métier + outbox dans la même transaction ; le dispatcher lit ensuite et publie.
+
 
 **Fonctionnement concret :**
 
-- Commande -> Ã©criture entitÃ©s + insert outbox dans la mÃªme transaction.
+- Commande -> écriture entités + insert outbox dans la même transaction.
 
-- Transaction commitÃ©e.
+- Transaction commitée.
 
-- Dispatcher lit outbox PENDING -> publie au broker â update status ou retry.
+- Dispatcher lit outbox PENDING -> publie au broker → update status ou retry.
 
-- **Gestion des erreurs :** retries, backoff, marquage FAILED, Ã©ventuellement dead-letter table.
+- **Gestion des erreurs :** retries, backoff, marquage FAILED, éventuellement dead-letter table.
 
-**Diagramme simplifiÃ© :**
+
+**Diagramme simplifié :**
+
 
 ```
 Service -> DB (domain + outbox)
 Outbox Dispatcher -> DB.outbox -> Broker -> Consumers
 ```
 
-## TÃ¢che 3 : Journal d'Ã©vÃ©nements
 
-- **RÃ´le :** archive append-only pour audit, replay et traÃ§abilitÃ©.
+## Tâche 3 : Journal d'événements
 
-- **EventLogRepository.append :** seule mÃ©thode pour garantir lâimmuabilitÃ©.
+- **Rôle :** archive append-only pour audit, replay et traçabilité.
+
+- **EventLogRepository.append :** seule méthode pour garantir l’immutabilité.
 
 - **Implications :**
-
 	- On peut reconstruire les projections par replay.
-
-	- Pas de suppression -> audit simple mais nÃ©cessitÃ© de snapshots.
-
+	- Pas de suppression -> audit simple mais nécessité de snapshots.
 	- Autres usages : audit, rapports, debugging, analytics.
 
-## TÃ¢che 4 : Limites de CQRS
 
-- **Limites :** complexitÃ©, cohÃ©rence Ã©ventuelle, duplication de donnÃ©es, versioning des Ã©vÃ©nements.
+## Tâche 4 : Limites de CQRS
 
-- **Limites compensÃ©es :** Outbox -> fiabilitÃ©, EventLog -> replay des projections.
+- **Limites :** complexité, cohérence éventuelle, duplication de données, versioning des événements.
+
+- **Limites compensées :** Outbox -> fiabilité, EventLog -> replay des projections.
 
 - **Nouvelles limites :** synchronisation de plusieurs projections, tests plus nombreux, versioning.
 
-- **Projections multiples :** un Ã©vÃ©nement peut dÃ©clencher plusieurs projections, pas dâatomicitÃ© cross-projections -> incohÃ©rences temporaires.
-- **Solutions :** idempotence, versioning, Sagas/orchestrateurs, monitoring, snapshots et compactage. 
+- **Projections multiples :** un événement peut déclencher plusieurs projections, pas d’atomicité cross-projections -> incohérences temporaires.
+- **Solutions :** idempotence, versioning, Sagas/orchestrateurs, monitoring, snapshots et compactage.
